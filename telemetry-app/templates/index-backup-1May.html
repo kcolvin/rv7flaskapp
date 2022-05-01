@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" href="static/favicon.ico" >
+        <!-- Syntax coloration -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='examples_data/prism/prism.css') }}" />
+        <!-- <link rel="stylesheet" type="text/css" href="static/examples_data/prism/prism.css" /> -->
+        <!-- This page style -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='examples_data/style.css') }}" />
+        <!-- Flight Indicators library styles -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/flightindicators.css') }}" />
+        <title>RV7 Telemetry</title>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    </head>
+<body>
+<div class="container">
+    <h2>RV7 Flight Instruments</h2>
+    <p id="ts"></p>
+    <p id="lat">:Lat</p>
+    <p id="lon">:Lon</p>
+    <div class="examples">
+        <div>
+            <span id="airspeed"></span>
+            <span id="attitude"></span>
+            <span id="altimeter"></span>
+        </div><div>
+            <span id="heading"></span>
+            <span id="variometer"></span>
+        </div>
+    </div>
+</div>
+<footer>
+    Send comments to: kcolvin@calpoly.edu
+</footer>
+<!-- Syntax color -->
+<script src="{{ url_for('static', filename='examples_data/prism/prism.js') }}"></script>
+<!-- Importing jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<!-- Importing the FlightIndicators library -->
+<script src="{{ url_for('static', filename='js/jquery.flightindicators.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        console.log( "document loaded" );
+    
+//    $( window ).on( "load", function() {
+//        console.log( "window loaded" );
+//    });
+
+    // Dynamic examples
+    var attitude = $.flightIndicator('#attitude', 'attitude', {roll:50, pitch:-20, size:300, showBox : true});
+    var heading = $.flightIndicator('#heading', 'heading', {heading:150, size:300,showBox:true});
+    var variometer = $.flightIndicator('#variometer', 'variometer', {vario:-5, size:300,showBox:true});
+    var airspeed = $.flightIndicator('#airspeed', 'airspeed', {showBox: true,size:300});
+    var altimeter = $.flightIndicator('#altimeter', 'altimeter',{showBox:true,size:300});
+
+    const source = new EventSource("/get-data");
+
+    source.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+        //console.log(data.ias);
+        //console.log(data.palt);
+        //console.log(data.vs);
+        //console.log(data.mh);
+        //document.getElementById("ts").innerHTML = data.time;
+        document.getElementById("ts").innerHTML = data.ts;
+        document.getElementById("lat").innerHTML = data.lat;
+        document.getElementById("lon").innerHTML = data.lon;
+        airspeed.setAirSpeed(data.ias);
+        altimeter.setAltitude(data.palt);
+        //  Convert to hPa
+        altimeter.setPressure(data.baro*33.86389);
+        variometer.setVario(data.vs/1000);
+        heading.setHeading(data.mh);
+        attitude.setRoll(data.roll);
+        attitude.setPitch(data.pitch)
+
+    }
+});
+</script>
+</body>
+</html>

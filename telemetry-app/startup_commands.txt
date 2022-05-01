@@ -1,0 +1,36 @@
+Create new instance. I used AWS Linux2
+install boto3
+install gunicorn
+# Install ngnix
+https://stackoverflow.com/questions/57784287/how-to-install-nginx-on-aws-ec2-linux-2
+
+# Install/enable nginx
+https://devcoops.com/install-nginx-on-aws-ec2-amazon-linux/
+
+# Add path variables
+PATH="/home/ec2-user/.local/bin/":"/usr/sbin":$PATH
+
+# Just test flask
+python3 -m flask run --host '0.0.0.0'
+
+# Added special /etc/nginx/nginx.conf file
+
+# Deploy flask with ngnix & gunicorn webservers
+python3 -m gunicorn --log-level debug -t 300 --workers 4 --bind 0.0.0.0:8000 wsgi:app
+# Release console
+nohup python3 -m gunicorn --log-level debug -t 300 --workers 4 --bind 0.0.0.0:8000 wsgi:app &
+
+# Start receive.py and Release console
+nohup python3 /home/ec2-user/telemetry-app/receive.py &
+# Check python processes:
+ps aux | grep python
+
+http://tm.calpoly.io
+
+
+# Check if process is running:
+ps aux | grep python
+ps aux | egrep -i "(nginx|gunicorn|python)"
+
+# Reattach to bash
+sudo yum install reptyr
